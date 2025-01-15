@@ -46,7 +46,7 @@ export default function Terminal({ onClose }: TerminalProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const recognitionRef = useRef<any>(null)
-  const { messages, input, handleInputChange, handleSubmit, setMessages, setInput } = useChat({
+  const { messages, input, handleInputChange, handleSubmit } = useChat({
     api: '/api/chat',
     initialMessages: [{ role: 'assistant', content: WELCOME_MESSAGE }]
   })
