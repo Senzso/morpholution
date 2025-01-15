@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { TerminalIcon, X, Send, Mic, Loader2, Wallet } from 'lucide-react'
+import { TerminalIcon, X, Send, Mic, Loader2 } from 'lucide-react'
 import { useChat } from 'ai/react'
 import Image from 'next/image'
 import { Button } from "@/components/ui/button"
@@ -39,47 +39,16 @@ export default function Terminal({ onClose }: TerminalProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [isInputExpanded, setIsInputExpanded] = useState(false);
   const [isRecording, setIsRecording] = useState(false)
-  const [isWalletConnected, setIsWalletConnected] = useState(false)
   const [showBundler, setShowBundler] = useState(false)
   const [showOnChain, setShowOnChain] = useState(false)
   const [showVolumeBot, setShowVolumeBot] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const recognitionRef = useRef<any>(null)
-  const { messages, input, handleInputChange, handleSubmit } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, setMessages, setInput } = useChat({
     api: '/api/chat',
     initialMessages: [{ role: 'assistant', content: WELCOME_MESSAGE }]
   })
-
-  const connectPhantomWallet = useCallback(async () => {
-    if (typeof window.solana !== 'undefined') {
-      try {
-        await window.solana.connect()
-        const publicKey = window.solana.publicKey.toString()
-        setIsWalletConnected(true)
-        toast({
-          title: "Wallet Connected",
-          description: `Phantom wallet connected: ${publicKey}`,
-        })
-        return `Wallet connected successfully. Public key: ${publicKey}`
-      } catch (err) {
-        console.error('Failed to connect wallet:', err)
-        toast({
-          title: "Connection Failed",
-          description: "Failed to connect Phantom wallet. Please try again.",
-          variant: "destructive",
-        })
-        return 'Failed to connect Phantom wallet. Please try again.'
-      }
-    } else {
-      toast({
-        title: "Wallet Not Found",
-        description: "Phantom wallet extension not found. Please install it and try again.",
-        variant: "destructive",
-      })
-      return 'Phantom wallet extension not found. Please install it and try again.'
-    }
-  }, [toast])
 
   const handleCommand = useCallback(async (command: string) => {
     const [cmd, ...args] = command.toLowerCase().trim().split(' ')
@@ -91,38 +60,63 @@ export default function Terminal({ onClose }: TerminalProps) {
         if (args.length === 0) {
           return 'Please provide a token address'
         } else {
-          const profile = await getTokenProfile(args[0])
-          return profile
+          try {
+            const profile = await getTokenProfile(args[0])
+            return profile
+          } catch (error) {
+            console.error('Error fetching token profile:', error)
+            return 'Error fetching token profile. Please try again.'
+          }
         }
       case '!token_orders':
         if (args.length < 2) {
           return 'Please provide chainId and token address'
         } else {
-          const orders = await getTokenOrders(args[0], args[1])
-          return orders
+          try {
+            const orders = await getTokenOrders(args[0], args[1])
+            return orders
+          } catch (error) {
+            console.error('Error fetching token orders:', error)
+            return 'Error fetching token orders. Please try again.'
+          }
         }
       case '!pair_info':
         if (args.length < 2) {
           return 'Please provide chainId and pairId'
         } else {
-          const pairInfo = await getPairInfo(args[0], args[1])
-          return pairInfo
+          try {
+            const pairInfo = await getPairInfo(args[0], args[1])
+            return pairInfo
+          } catch (error) {
+            console.error('Error fetching pair info:', error)
+            return 'Error fetching pair info. Please try again.'
+          }
         }
       case '!twitter_check':
         if (args.length === 0) {
           return 'Please provide a Twitter username'
         } else {
-          const twitterInfo = await checkTwitterUsername(args[0])
-          return twitterInfo.formattedData || twitterInfo.error || 'No information found for this username.'
+          try {
+            const twitterInfo = await checkTwitterUsername(args[0])
+            return twitterInfo.formattedData || twitterInfo.error || 'No information found for this username.'
+          } catch (error) {
+            console.error('Error checking Twitter username:', error)
+            return 'Error checking Twitter username. Please try again.'
+          }
         }
       case '!gen_wallet':
-        const newWallet = Keypair.generate()
-        const publicKey = newWallet.publicKey.toString()
-        const privateKey = Buffer.from(newWallet.secretKey).toString('hex')
-        return `New wallet generated:
+        try {
+          const newWallet = Keypair.generate()
+          const publicKey = newWallet.publicKey.toString()
+          const privateKey = Buffer.from(newWallet.secretKey).toString('hex')
+          return `New wallet generated:
 Public Key: ${publicKey}
 Private Key: ${privateKey}
 IMPORTANT: Save your private key securely. It will not be shown again.`
+        } catch (error) {
+          console.error('Error generating wallet:', error)
+          return 'Error generating wallet. Please try again.'
+        }
       case '!socials':
         return 'Our X is: https://x.com/Morpholution'
       default:
