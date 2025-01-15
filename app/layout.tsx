@@ -10,8 +10,8 @@ export const metadata: Metadata = {
   description: 'Explore the future with Morpholution',
   icons: {
     icon: [
+      { url: '/favicon.ico', sizes: 'any' },
       { url: '/newicon.png', sizes: '180x180', type: 'image/png' },
-      { url: '/favicon.ico', sizes: 'any' }
     ],
     apple: [
       { url: '/newicon.png', sizes: '180x180', type: 'image/png' },
@@ -27,8 +27,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/newicon.png" type="image/png" sizes="180x180" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/newicon.png" type="image/png" sizes="180x180" />
         <link rel="apple-touch-icon" href="/newicon.png" />
         <meta name="theme-color" content="#000000" />
         <meta name="msapplication-TileImage" content="/newicon.png" />
